@@ -10,18 +10,31 @@ namespace ASP_HomeTask7.Controllers
         public static List<Person> People = new List<Person>();
 
         [HttpGet]
-        public List<Person> GetPeople()
+        public ActionResult GetPeople()
         {
-            return People;
+            if (People.Count == 0)
+            {
+                return NoContent();
+            }
+            return Ok(People);
         }
 
         [HttpGet("{id}")]
-        public Person? GetPerson([FromRoute] int id)
+        public ActionResult GetPerson([FromRoute] int id)
         {
-            return People.FirstOrDefault(x => x.Id == id);
+            var person = People.FirstOrDefault(x => x.Id == id);
+            if (person == null)
+            {
+                return BadRequest(new { ErrorMassage = $"{id} ID not found" });
+            }
+            else
+            {
+                return Ok(person);
+            }
+                
         }
         [HttpPost]
-        public Person CreatePerson([FromQuery] string firstName, string lastName)
+        public ActionResult CreatePerson([FromQuery] string firstName, string lastName)
         {
             var person = new Person
             {
@@ -30,25 +43,25 @@ namespace ASP_HomeTask7.Controllers
                 LastName = lastName
             };
             People.Add(person);
-            return person;         
+            return Ok(person);         
         }
         [HttpPut]
-        public bool UpdatePerson([FromQuery] Person updatePerson)
+        public ActionResult UpdatePerson([FromQuery] Person updatePerson)
         {
             var person = People.FirstOrDefault(x => x.Id == updatePerson.Id);
-            if (person == null) return false;
+            if (person == null) return BadRequest(new { ErrorMassage = "Person with this id was not found" });
 
             person.FirstName = updatePerson.FirstName;
             person.LastName = updatePerson.LastName;
-            return true;        
+            return Ok(person);        
         }
         [HttpDelete]
-        public bool DeletePerson(int id)
+        public ActionResult DeletePerson(int id)
         {
             var person = People.FirstOrDefault(x =>x.Id == id);
-            if (person == null) return false;
+            if (person == null) return BadRequest(new { ErrorMassage = "Person with this id was not found" });
             People.Remove(person);
-            return true;
+            return Ok(person);
         }
     }
     public class Person
